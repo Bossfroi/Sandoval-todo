@@ -1,21 +1,19 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const initialStatusOptions = ['Initialize', 'Processing', 'Complete'];
+const STATUSES = ['Initialize', 'Processing', 'Complete'];
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
     title: '',
     task: '',
-    status: initialStatusOptions[0], 
+    status: STATUSES[0],
   });
-
   useEffect(() => {
     const storedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
     const sortedTasks = storedTasks.sort((a, b) => b.createdAt - a.createdAt);
     setTasks(sortedTasks);
   }, []);
-
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }, [tasks]);
@@ -24,7 +22,11 @@ function App() {
     if (newTask.title.trim() !== '' && newTask.task.trim() !== '') {
       const updatedTasks = [
         ...tasks,
-        { ...newTask, id: new Date().getTime().toString(), createdAt: new Date() },
+        {
+          ...newTask,
+          id: new Date().getTime().toString(),
+          createdAt: new Date(),
+        },
       ];
 
       const sortedTasks = updatedTasks.sort((a, b) => b.createdAt - a.createdAt);
@@ -32,7 +34,7 @@ function App() {
       setNewTask({
         title: '',
         task: '',
-        status: initialStatusOptions[0],
+        status: STATUSES[0],
       });
     }
   };
@@ -50,15 +52,16 @@ function App() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-md shadow-md">
-      <h1 className="text-3xl font-semibold mb-4">Todo App</h1>
+    <div className="max-w-lg mx-auto mt-8 p-6 bg-slate-200 rounded-md shadow-lg">
+      <h1 className="text-3xl font-semibold mb-4">TODO</h1>
 
       <ul>
         {tasks.map((task) => (
           <li key={task.id} className="flex items-start justify-between border-b py-2">
             <div>
               <h2 className="text-lg font-semibold">{task.title}</h2>
-              <p className="text-gray-500">{task.task}</p>
+              <hr />
+              <p>{task.task}</p>
               <span className={`text-${task.status === 'Complete' ? 'green' : 'red'}-500`}>
                 Status: {task.status}
               </span>
@@ -70,20 +73,20 @@ function App() {
               >
                 Delete
               </button>
-              {/* Add an update button and form for updating tasks */}
+
               <button
-                className="text-blue-500 hover:text-blue-700 ml-2"
+                className="text-green-500 hover:text-blue-700 ml-2"
                 onClick={() => {
                   const updatedStatus =
-                    task.status === 'Not Started'
-                      ? 'Ongoing'
-                      : task.status === 'Ongoing'
+                    task.status === 'Initialize'
+                      ? 'Processing'
+                      : task.status === 'Processing'
                       ? 'Complete'
-                      : 'Not Started';
+                      : 'Initialize';
                   updateTask(task.id, { status: updatedStatus });
                 }}
               >
-                Update Status
+                Update
               </button>
             </div>
           </li>
@@ -109,7 +112,7 @@ function App() {
           onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
           className="border rounded-md px-3 py-2 w-full mb-2"
         >
-          {initialStatusOptions.map((status) => (
+          {STATUSES.map((status) => (
             <option key={status} value={status}>
               {status}
             </option>
